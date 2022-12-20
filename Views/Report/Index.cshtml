@@ -1,0 +1,291 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@using System.Configuration
+@model AirCrew_Roster.ViewModel.VM_CrewRosterReport
+
+
+<title>Air Crew Roster -Report</title>
+<style>
+    .card-body {
+        height: auto;
+    }
+
+    .ui-datepicker {
+        z-index: +105 !important;
+    }
+
+    .multiselect {
+        background-color: white;
+        border: 1px solid #c3c3c3;
+    }
+
+    .btn-group {
+        width: 100%;
+    }
+
+    .table td, .table th {
+        padding: .5em !important;
+        border-top: 0px solid #e3e6f0;
+    }
+
+    #box {
+        overflow: auto;
+        width: 100%;
+        /*max-height: 400px;*/
+    }
+
+    #overlay {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 2;
+        cursor: pointer;
+    }
+
+    .loadingText {
+        margin-right: auto;
+        margin-left: auto;
+        margin-top: 90px;
+        /*margin-bottom: auto;*/
+        display: block;
+        height: 100px;
+        width: 100px;
+        color: whitesmoke;
+    }
+
+
+    .ui-jqgrid tr.jqgrow td {
+        word-wrap: break-word; /* IE 5.5+ and CSS3 */
+        white-space: pre-wrap; /* CSS3 */
+        white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+        white-space: -pre-wrap; /* Opera 4-6 */
+        white-space: -o-pre-wrap; /* Opera 7 */
+        overflow: hidden;
+        height: auto;
+        vertical-align: middle;
+        padding-top: 3px;
+        padding-bottom: 3px;
+    }
+    /*.ui-jqgrid tr.jqgrow td { white-space: normal !important; height: auto; vertical-align: text-top; padding-top: 2px; }*/
+    th.ui-th-column div {
+        word-wrap: break-word; /* IE 5.5+ and CSS3 */
+        white-space: pre-wrap; /* CSS3 */
+        white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+        white-space: -pre-wrap; /* Opera 4-6 */
+        white-space: -o-pre-wrap; /* Opera 7 */
+        overflow: hidden;
+        height: auto;
+        vertical-align: middle;
+        padding-top: 3px;
+        padding-bottom: 3px;
+    }
+
+    .ui-jqgrid .ui-jqgrid-htable .ui-th-div {
+        height: auto;
+        margin-top: 2px;
+    }
+
+    .btn-primary {
+        color: #fff;
+        background-color: #e62e2d;
+        border-color: #e62e2d;
+    }
+
+        .btn-primary:hover {
+            color: #fff;
+            background-color: #e62e2d;
+            border-color: #e62e2d;
+        }
+
+        .btn-primary:focus, .btn-primary.focus {
+            color: #fff;
+            background-color: #e62e2d;
+            border-color: #e62e2d;
+            box-shadow: 0 0 0 0.2rem rgba(105, 136, 228, 0.5);
+        }
+
+        .btn-primary:not(:disabled):not(.disabled):active, .btn-primary:not(:disabled):not(.disabled).active, .show > .btn-primary.dropdown-toggle {
+            background-color: #e62e2d;
+            border-color: #e62e2d;
+        }
+
+    .display_inline {
+        display: inline;
+        margin: 5px 5px;
+        width: 20%;
+    }
+
+    .btn-group {
+        /*width: 20%;
+        margin: 5px 5px;*/
+    }
+</style>
+
+<div class="col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+
+            @*@using (Html.BeginForm("FLTT_CreateDashboardProfile", "Home", FormMethod.Post, new { id = "frmProfileDetails" }))
+                {*@
+            @Html.ValidationSummary(true)
+
+
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Filter Criteria</h6>
+                </div>
+                <div class="card-body">
+                    <div id="overlay">
+                        <span class="loadingText">Loading...</span>
+                    </div>
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td width="15%">
+                                    <input class="" type="radio" id="dutydate" name="reportType" value="1" checked>
+                                    <label for="dutydate">Duty Date</label>
+                                </td>
+                                <td>
+                                    <input class="" type="radio" id="changesMadeBetween" name="reportType" value="2" style="margin-left: 20px;">
+                                    <label for="changesMadeBetween">Changes Made Between</label>
+                                </td>
+                                <td>
+                                    <select class="form-control match-content" onchange="dateRangeChange()" id="dateRangeDD">
+                                        <option value="0">Date Range</option>
+                                        <option value="1">Current Month</option>
+                                        <option value="2">Previous Month</option>
+                                        @*<option value="3">Next Month</option>*@
+                                        <option value="4">Current Calender Quarter</option>
+                                        <option value="5">Previous Calender Quarter</option>
+                                        <option value="6">Current Fiscal year</option>
+                                        <option value="7">Previous Fiscal year</option>
+
+                                    </select>
+                                </td>
+                                <td>
+                                    @Html.TextBoxFor(model => model.DutyDate, new { maxlength = "30", @class = "form-control", id = "TxtFromDate", @placeholder = "From Date" })
+                                    <script>
+                                            $(function () {
+                                                $("#TxtFromDate").datepicker({
+                                                    dateFormat: 'dd-mm-yy',
+                                                    showButtonPanel: true,
+                                                    changeMonth: true,
+                                                    changeYear: true,
+                                                    onSelect: function (dateStr) {
+                                                        var min = $(this).datepicker('getDate') || new Date(); // Selected date or today if none
+                                                        $('#TxtToDate').datepicker('option', { minDate: min });
+                                                    }
+                                                });
+                                            });
+                                    </script>
+                                </td>
+                                <td>
+                                    @Html.TextBoxFor(model => model.NotifiedOn, new { maxlength = "30", @class = "form-control", id = "TxtToDate", @placeholder = "To Date" })
+                                    <script>
+                                            $(function () {
+                                                $("#TxtToDate").datepicker({
+                                                    dateFormat: 'dd-mm-yy',
+                                                    showButtonPanel: true,
+                                                    changeMonth: true,
+                                                    changeYear: true,
+                                                });
+                                            });
+                                    </script>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="15%">
+                                    @Html.DropDownListFor(model => model.Base, ViewBag.Base as SelectList, "Select Base", new { @class = "form-control match-content", id = "baseCode" })
+                                    <span class="RequiredField" style="color:red"> @Html.ValidationMessageFor(model => model.Base)</span>
+                                </td>
+                                <td>
+                                    @*@Html.DropDownListFor(model => model.Rank, new SelectList(string.Empty), new { @class = "form-control", multiple = "multiple", id = "sltRank" })*@
+                                    @Html.DropDownListFor(model => model.Rank, ViewBag.Rank as SelectList, "Select Rank", new { @class = "form-control match-content", id = "TxtRank" })
+                                    <span class="RequiredField" style="color:red"> @Html.ValidationMessageFor(model => model.Rank)</span>
+                                </td>
+                                <td>
+                                    @Html.DropDownListFor(model => model.StaffID, ViewBag.StaffID as SelectList, new { @class = "form-control match-content", multiple = "multiple", id = "sltStaffID" })
+                                    <span class="RequiredField" style="color:red"> @Html.ValidationMessageFor(model => model.StaffID)</span>
+                                </td>
+                                <td>
+                                    @Html.DropDownListFor(model => model.EmployeeName, ViewBag.EmployeeName as SelectList, new { @class = "form-control match-content", multiple = "multiple", id = "EmployeeName" })
+                                    <span class="RequiredField" style="color:red"> @Html.ValidationMessageFor(model => model.EmployeeName)</span>
+                                </td>
+                                <td align="">
+                                    <button type="button" id="btnShowDetails" class="btn btn-primary pull-left" style="display: inline;">Generate</button>
+                                    <div class="dropdown pull-right" style="display: inline; margin-left: 20px;">
+                                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Download
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                            <a class="dropdown-item" href="#" id="btnDownLoadCSV">CSV</a>
+                                            <a class="dropdown-item" href="#" id="btnDownLoadExcel">Excel</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!--<div class="box box-primary">
+            <div class="box-body">
+                <h4>Filter Criteria</h4>
+
+            </div>
+            <!-- /.box-body -->
+            <!--@*<div class="box-footer clearfix no-border">
+
+            </div>*@
+            </div>-->
+            @*}*@
+            <!-- /.box -->
+        </div>
+    </div>
+</div>
+
+
+<section class="content report-sec">
+    <div class="row">
+        @*<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 no-sm-gutter no-md-gutter clearfix">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 no-sm-gutter no-md-gutter">*@
+        <div class="" id="box">
+
+            <table id="CrewRosterReport" class="table-responsive"></table>
+            <div id="pagerCrewRosterReportGrid"></div>
+
+            @*<div class="pdftable" id="pdftable" style="display:block">
+                </div>*@
+        </div>
+        @*</div>
+            </div>*@
+    </div>
+</section>
+
+@*
+    <script src="~/Scripts/Jquery/jquery.validate.min.js"></script>
+    <script src="~/Scripts/Jquery/jquery.validate.unobtrusive.min.js"></script>
+    <link href="~/Content/Jqgrid/plugins/ui.multiselect.css" rel="stylesheet" />*@
+
+
+<script type="text/javascript" language="javascript" src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+
+<script src="~/Content/theme/js/excelexportjs.js"></script>
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.4.1/jspdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/2.3.5/jspdf.plugin.autotable.min.js"></script>
+    <script src="~/Content/theme/js/tableHTMLExport.js"></script>*@
+<script src="~/Content/theme/js/jspdf.debug.js"></script>
+<script src="~/Scripts/pages/AirCrewRosterReport/AirCrewRosterReport.js"></script>
+
+

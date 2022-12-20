@@ -1,0 +1,188 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Login</title>
+
+    <!-- Custom fonts for this template-->
+    <link href="~/Content/theme/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+          rel="stylesheet">
+
+    <!-- Custom styles for this template-->
+    @Styles.Render("~/Content/css")
+
+    <style>
+        .bg-gradient-primary {
+            background-color: #e62e2d;
+            background-image: linear-gradient( 180deg,#e62e2d 10%,#a92828 100%);
+            background-size: cover;
+        }
+
+        .img-block {
+            /*background-image: url('../../Content/theme/img/spicejet-inline.jpg');
+            background-repeat: no-repeat;
+            background-size: cover;*/
+            background: url('../../Content/theme/img/spicejet-inline.jpg') no-repeat center center fixed;
+            -webkit-background-size: contain;
+            -moz-background-size: contain;
+            -o-background-size: contain;
+            background-size: contain;
+            height: 100vh;
+        }
+
+        .btn-primary {
+            color: #fff;
+            background-color: #e62e2d;
+            border-color: #e62e2d;
+        }
+
+        #overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2;
+            cursor: pointer;
+        }
+
+        .loadingText {
+            margin-right: auto;
+            margin-left: auto;
+            margin-top: 90px;
+            /*margin-bottom: auto;*/
+            display: block;
+            height: 100px;
+            width: 100px;
+            color: whitesmoke;
+        }
+
+        .login-from {
+            padding: 10px;
+            text-align: center;
+            padding-top: 90px;
+        }
+
+        .form-group {
+            padding-left: 15px;
+            width: 385px;
+        }
+
+        .btn {
+            margin-left: 15px;
+        }
+
+        .row {
+            margin-right: 0rem !important;
+        }
+
+        .txt-headiing {
+            display: block;
+            color: red;
+            font-weight: bold;
+            text-align: center;
+            font-size: 25px;
+        }
+
+        .txt-subheading {
+            display: block;
+            color: red;
+            font-weight: bold;
+            margin-top: -30px;
+            text-align: center;
+            font-size: 25px;
+        }
+
+        .txt-subheading1 {
+            display: block;
+            color: black;
+            font-weight: bold;
+            margin-top: -30px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .pull-right {
+            float: right
+        }
+
+        .login-text {
+            margin: 40px 0px;
+        }
+
+        .login-img {
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="row">
+        <div class="col-9">
+            <img class="login-img" src="../../Content/theme/img/spicejet-inline.jpg" />
+        </div>
+        <div class="col-3">
+            <div class="login-from">
+                <div id="overlay" class="overlay">
+                    <span class="loadingText">Loading...</span>
+                </div>
+                <img src="~/Content/theme/img/Spicejet-logo-transparent.png" />"
+                <div class="login-text">
+                    <h1 class="txt-headiing">Welcome To </h1>
+                    <br />
+                    <h3 class="txt-subheading">SpiceJet Reporting</h3>
+                    <br />
+                </div>
+                <h4 class="txt-subheading1">Please login using your Crew Portal Username and Password</h4>
+                <br />
+                <br />
+                <div class="form-group">
+                    <label for="username" class="sr-only">Email</label>
+                    <input type="text" placeholder="Username" class="form-control" id="username">
+                </div>
+                @*<div class="form-group">
+                        <label for="username" class="sr-only">ECN No</label>
+                        <input type="text" placeholder="ECN No" class="form-control" id="ecn">
+                    </div>*@
+                <div class="form-group">
+
+                    <label for="password" class="sr-only">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Password">
+                </div>
+                <br />
+                <br />
+                <button type="submit" class="btn btn-primary pull-left" id="loginSubmit">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="~/Content/theme/vendor/jquery/jquery.min.js"></script>
+
+    <script src="~/Content/theme/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="~/Content/theme/vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="~/Content/theme/js/sb-admin-2.min.js"></script>
+    <script src="~/Scripts/pages/login/login.js"></script>
+    @Html.Hidden("applicationPath", Url.Content("~"))
+</body>
+
+</html>

@@ -1,0 +1,579 @@
+﻿
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using System.Configuration
+@model AirCrew_Roster.ViewModel.VM_CrewRosterReport
+
+<style>
+    .card-body {
+        height: auto;
+    }
+
+    .ui-datepicker {
+        z-index: +105 !important;
+    }
+
+    .multiselect {
+        background-color: white;
+        border: 1px solid #c3c3c3;
+    }
+
+    .btn-group {
+        width: 100%;
+    }
+
+    .table td, .table th {
+        padding: .5em !important;
+        border-top: 0px solid #e3e6f0;
+    }
+
+    #box {
+        overflow: auto;
+        width: 100%;
+    }
+
+    .highcharts-figure, .highcharts-data-table table {
+        min-width: 320px;
+        max-width: 660px;
+        margin: 1em auto;
+    }
+
+    .highcharts-data-table table {
+        font-family: Verdana, sans-serif;
+        border-collapse: collapse;
+        border: 1px solid #EBEBEB;
+        margin: 10px auto;
+        text-align: center;
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .highcharts-data-table caption {
+        padding: 1em 0;
+        font-size: 1.2em;
+        color: #555;
+    }
+
+    .highcharts-data-table th {
+        font-weight: 600;
+        padding: 0.5em;
+    }
+
+    .highcharts-data-table td, .highcharts-data-table th, .highcharts-data-table caption {
+        padding: 0.5em;
+    }
+
+    .highcharts-data-table thead tr, .highcharts-data-table tr:nth-child(even) {
+        background: #f8f8f8;
+    }
+
+    .highcharts-data-table tr:hover {
+        background: #f1f7ff;
+    }
+
+    .highcharts-xaxis-labels text {
+        text-decoration: none !important;
+    }
+
+
+    #overlay {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 2;
+        cursor: pointer;
+    }
+
+    .loadingText {
+        margin-right: auto;
+        margin-left: auto;
+        margin-top: 90px;
+        /*margin-bottom: auto;*/
+        display: block;
+        height: 100px;
+        width: 100px;
+        color: whitesmoke;
+    }
+
+
+    .ui-jqgrid tr.jqgrow td {
+        word-wrap: break-word; /* IE 5.5+ and CSS3 */
+        white-space: pre-wrap; /* CSS3 */
+        white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+        white-space: -pre-wrap; /* Opera 4-6 */
+        white-space: -o-pre-wrap; /* Opera 7 */
+        overflow: hidden;
+        height: auto;
+        vertical-align: middle;
+        padding-top: 3px;
+        padding-bottom: 3px;
+    }
+    /*.ui-jqgrid tr.jqgrow td { white-space: normal !important; height: auto; vertical-align: text-top; padding-top: 2px; }*/
+    th.ui-th-column div {
+        word-wrap: break-word; /* IE 5.5+ and CSS3 */
+        white-space: pre-wrap; /* CSS3 */
+        white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+        white-space: -pre-wrap; /* Opera 4-6 */
+        white-space: -o-pre-wrap; /* Opera 7 */
+        overflow: hidden;
+        height: auto;
+        vertical-align: middle;
+        padding-top: 3px;
+        padding-bottom: 3px;
+    }
+
+    .ui-jqgrid .ui-jqgrid-htable .ui-th-div {
+        height: auto;
+        margin-top: 2px;
+    }
+
+    .btn-primary {
+        color: #fff;
+        background-color: #e62e2d;
+        border-color: #e62e2d;
+    }
+
+        .btn-primary:hover {
+            color: #fff;
+            background-color: #e62e2d;
+            border-color: #e62e2d;
+        }
+
+        .btn-primary:focus, .btn-primary.focus {
+            color: #fff;
+            background-color: #e62e2d;
+            border-color: #e62e2d;
+            box-shadow: 0 0 0 0.2rem rgba(105, 136, 228, 0.5);
+        }
+
+        .btn-primary:not(:disabled):not(.disabled):active, .btn-primary:not(:disabled):not(.disabled).active, .show > .btn-primary.dropdown-toggle {
+            background-color: #e62e2d;
+            border-color: #e62e2d;
+        }
+
+    .display_inline {
+        display: inline;
+        margin: 5px 5px;
+        width: 20%;
+    }
+
+    .btn-group {
+        width: 20%;
+        margin: 5px 5px;
+    }
+</style>
+
+
+<div class="col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            @Html.ValidationSummary(true)
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Dashboard Filter Criteria</h6>
+                </div>
+                <div class="card-body">
+                    <div id="overlay">
+                        <span class="loadingText">Loading...</span>
+                    </div>
+
+                    <div class="row col-12">
+                        <div class="col-12">
+                            <select class="form-control match-content display_inline" onchange="dateRangeChange()" id="dateRangeDD">
+                                <option value="0">Date Range</option>
+                                <option value="1">Current Month</option>
+                                <option value="2">Previous Month</option>
+                                @*<option value="3">Next Month</option>*@
+                                @*<option value="4">Current Calender Quarter</option>
+                                    <option value="5">Previous Calender Quarter</option>
+                                    <option value="6">Current Fiscal year</option>
+                                    <option value="7">Previous Fiscal year</option>*@
+
+                            </select>
+
+                            @Html.TextBoxFor(model => model.DutyDate, new { maxlength = "30", @class = "form-control display_inline", autocomplete = "off", id = "TxtFromDate", @placeholder = "From Date" })
+                            <script>
+                                $(function () {
+                                    $("#TxtFromDate").datepicker({
+                                        dateFormat: 'dd-mm-yy',
+                                        changeMonth: true,
+                                        changeYear: true,
+                                        showButtonPanel: true,
+                                        onSelect: function (dateStr) {
+                                            var min = $(this).datepicker('getDate') || new Date(); // Selected date or today if none
+                                            $('#TxtToDate').datepicker('option', { minDate: min });
+                                        }
+                                    });
+                                });
+                            </script>
+
+                            @Html.TextBoxFor(model => model.NotifiedOn, new { maxlength = "30", @class = "form-control display_inline", autocomplete = "off", id = "TxtToDate", @placeholder = "To Date" })
+                            <script>
+                                $(function () {
+                                    $("#TxtToDate").datepicker({
+                                        changeMonth: true,
+                                        changeYear: true,
+                                        showButtonPanel: true,
+                                        dateFormat: 'dd-mm-yy'
+                                    });
+                                });
+                            </script>
+
+                            @Html.DropDownListFor(model => model.Rank, ViewBag.CrewType as SelectList, "Select Roster", new { @class = "form-control match-content display_inline", multiple = "multiple", id = "SelRosterDD" })
+                            @Html.DropDownListFor(model => model.Rank, ViewBag.CrewType as SelectList, "Select Month", new { @class = "form-control match-content display_inline", multiple = "multiple", id = "SelMonthDD" })
+                            @Html.DropDownListFor(model => model.Base, ViewBag.Base as SelectList, new { @class = "form-control match-content display_inline", multiple = "multiple", id = "baseCode" })
+                            @Html.DropDownListFor(model => model.Rank, ViewBag.CrewType as SelectList, new { @class = "form-control match-content display_inline", multiple = "multiple", id = "TxtRankMultiselect" })
+                            @Html.DropDownListFor(model => model.StaffID, ViewBag.StaffID as SelectList, new { @class = "form-control match-content display_inline", multiple = "multiple", id = "sltStaffID" })
+                            @Html.DropDownListFor(model => model.EmployeeName, ViewBag.EmployeeName as SelectList, new { @class = "form-control match-content display_inline", multiple = "multiple", id = "EmployeeName" })
+
+                            <button type="button" id="btnShowDetails" class="btn btn-primary center pull-left" style="margin-left: 5px;"><i class="fa fa-search" aria-hidden="true"></i> Generate</button>
+                            <button type="button" id="btnClearDetails" class="btn btn-primary center pull-left" style="margin-left: 10px;"><i class="fa fa-times-circle-o" aria-hidden="true"></i> Clear</button>
+
+                        </div>
+                        @*<div class="col-2">
+                                <button type="button" id="btnShowDetails" class="btn btn-primary center pull-left"><i class="fa fa-search" aria-hidden="true"></i> Generate</button>
+                                <button type="button" id="btnClearDetails" class="btn btn-primary center pull-left" style="margin-left: 10px;"><i class="fa fa-refresh" aria-hidden="true"></i> Clear</button>
+
+                            </div>*@
+                    </div>
+
+
+
+
+                    @*<div class="row col-xl-12">
+                            <div class="col-xl-2 col-lg-2">
+                                @Html.DropDownListFor(model => model.Base, ViewBag.Base as SelectList, new { @class = "form-control match-content", multiple = "multiple", id = "baseCode" })
+                                <span class="RequiredField" style="color:red"> @Html.ValidationMessageFor(model => model.Base)</span>
+                            </div>
+                            <div class="col-xl-2 col-lg-2">
+                                @Html.DropDownListFor(model => model.Rank, ViewBag.CrewType as SelectList, new { @class = "form-control match-content", multiple = "multiple", id = "TxtRankMultiselect" })
+                            </div>
+                            <div class="col-xl-2 col-lg-2">
+                                @Html.DropDownListFor(model => model.StaffID, ViewBag.StaffID as SelectList, new { @class = "form-control match-content", multiple = "multiple", id = "sltStaffID" })
+                                <span class="RequiredField" style="color:red"> @Html.ValidationMessageFor(model => model.StaffID)</span>
+                            </div>
+                            <div class="col-xl-2 col-lg-2">
+                                @Html.DropDownListFor(model => model.EmployeeName, ViewBag.EmployeeName as SelectList, new { @class = "form-control match-content", multiple = "multiple", id = "EmployeeName" })
+                                <span class="RequiredField" style="color:red"> @Html.ValidationMessageFor(model => model.EmployeeName)</span>
+                            </div>
+                        </div>*@
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-xl-12">
+        <div class="col-xl-4 col-lg-5" id="report_0" style="display:none">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    @*<h6 class="m-0 font-weight-bold text-primary">Revenue Sources one</h6>*@
+
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div id="overlay" class="overlay">
+                        <span class="loadingText">Loading...</span>
+                    </div>
+                    <figure class="highcharts-figure">
+                        <div id="container_one"></div>
+                    </figure>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-5" id="report_1" style="display:none">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    @*<h6 class="m-0 font-weight-bold text-primary">Revenue Sources</h6>*@
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div id="overlay" class="overlay">
+                        <span class="loadingText">Loading...</span>
+                    </div>
+                    <figure class="highcharts-figure">
+                        <div id="container_two"></div>
+                    </figure>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-5" id="report_2" style="display:none">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    @*<h6 class="m-0 font-weight-bold text-primary">Revenue Sources</h6>*@
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div id="overlay" class="overlay">
+                        <span class="loadingText">Loading...</span>
+                    </div>
+                    <figure class="highcharts-figure">
+                        <div id="container_three"></div>
+                    </figure>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*ROSTER CHART*@
+
+    <div class="row">
+        <div class="col-xl-4 col-lg-4" id="rosterChart_one" style="display:none">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    @*<h6 class="m-0 font-weight-bold text-primary">Roster One</h6>*@
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div id="overlay" class="overlay">
+                        <span class="loadingText">Loading...</span>
+                    </div>
+
+                    <figure class="highcharts-figure">
+                        <div id="roster_Chart_sec_one"></div>
+                        @*<p class="highcharts-description">
+                                Pie chart where the individual slices can be clicked to expose more
+                                detailed data.
+                            </p>*@
+                    </figure>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-4" id="rosterChart_two" style="display:none">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    @*<h6 class="m-0 font-weight-bold text-primary">Roster Two</h6>*@
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div id="overlay" class="overlay">
+                        <span class="loadingText">Loading...</span>
+                    </div>
+
+                    <figure class="highcharts-figure">
+                        <div id="roster_Chart_sec_two"></div>
+                        @*<p class="highcharts-description">
+                                Pie chart where the individual slices can be clicked to expose more
+                                detailed data.
+                            </p>*@
+                    </figure>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-lg-4" id="rosterChart_three" style="display:none">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    @*<h6 class="m-0 font-weight-bold text-primary">Roster three</h6>*@
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div id="overlay" class="overlay">
+                        <span class="loadingText">Loading...</span>
+                    </div>
+
+                    <figure class="highcharts-figure">
+                        <div id="roster_Chart_sec_three"></div>
+                        @*<p class="highcharts-description">
+                                Pie chart where the individual slices can be clicked to expose more
+                                detailed data.
+                            </p>*@
+                    </figure>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12 col-lg-12" id="monthChart" style="display:none">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    @*<h6 class="m-0 font-weight-bold text-primary">Month Chart</h6>*@
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div id="overlay" class="overlay">
+                        <span class="loadingText">Loading...</span>
+                    </div>
+
+                    <figure class="highcharts-figure">
+                        <div id="month_Chart_sec"></div>
+                        @*<p class="highcharts-description">
+                                Pie chart where the individual slices can be clicked to expose more
+                                detailed data.
+                            </p>*@
+                    </figure>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-lg-5" id="OnloadChart_one" style="display:none">
+            <div class="card shadow md-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Roster Stability Chart MTD</h6>
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div id="overlay" class="overlay">
+                        <span class="loadingText">Loading...</span>
+                    </div>
+                    <figure class="highcharts-figure">
+                        <div id="Onload_Chart_sec_one"></div>
+                        @*<p class="highcharts-description">
+                                Pie chart where the individual slices can be clicked to expose more
+                                detailed data.
+                            </p>*@
+                    </figure>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-lg-5" id="OnloadChart_two" style="display:none">
+            <div class="card shadow md-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Roster Stability Chart MTD</h6>
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div id="overlay" class="overlay">
+                        <span class="loadingText">Loading...</span>
+                    </div>
+                    <figure class="highcharts-figure">
+                        <div id="Onload_Chart_sec_two"></div>
+                        @*<p class="highcharts-description">
+                                Pie chart where the individual slices can be clicked to expose more
+                                detailed data.
+                            </p>*@
+                    </figure>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4" id="OnloadChart_three" style="display:none">
+            <div class="card shadow md-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Roster Stability Chart MTD</h6>
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div id="overlay" class="overlay">
+                        <span class="loadingText">Loading...</span>
+                    </div>
+                    <figure class="highcharts-figure">
+                        <div id="Onload_Chart_sec_three"></div>
+                        @*<p class="highcharts-description">
+                                Pie chart where the individual slices can be clicked to expose more
+                                detailed data.
+                            </p>*@
+                    </figure>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-12" id="full_screen_chart_sec" style="display:none">
+            <div class="card shadow md-12">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Roster Change Count (<span id="lblrosterCount"></span>) </h6>
+                    <select class="form-control match-content pull-right" id="dateWiseChartFilter" style="width:20%" onchange="loadOnloadChart_dateWise()">
+                        @*<option value="1"> 15% to 25% </option>
+                            <option value="2"> 26% to 50% </option>
+                            <option value="3"> 51% to 75% </option>
+                            <option value="4"> 76% to 100%</option>*@
+                        <option selected value="1"> All </option>
+                        <option value="2"> Top 25 </option>
+                        <option value="3"> Top 50 </option>
+                        <option value="4"> Top 75</option>
+                        <option value="5"> Top 100</option>
+                    </select>
+                    <select class="form-control match-content pull-right" id="topCaseWiseChartFilter" style="width:20%" onchange="loadOnloadChart_MultStaffIdWise()">
+                        <option selected value="1"> All </option>
+                        <option value="2"> Top 25 </option>
+                        <option value="3"> Top 50 </option>
+                        <option value="4"> Top 75</option>
+                        <option value="5"> Top 100</option>
+                    </select>
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div id="overlay" class="overlay">
+                        <span class="loadingText">Loading...</span>
+                    </div>
+                    <figure class="highcharts-figure_">
+                        <div id="full_screen_chart"></div>
+                        @*<p class="highcharts-description">
+                                Pie chart where the individual slices can be clicked to expose more
+                                detailed data.
+                            </p>*@
+                    </figure>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content report-sec" id="baseWisegridSec" style="display:none">
+    <div class="row">
+        <div class="" id="box">
+            <table id="baseWiseGrid" class="table-responsive"></table>
+            <div id="pagerbaseWiseGrid"></div>
+        </div>
+    </div>
+</section>
+<section class="content report-sec" id="staffWiseGridSec" style="display:none">
+    <div class="row">
+        <div class="" id="box">
+            <table id="staffwiseGrid" class="table-responsive"></table>
+            <div id="pagerstaffwiseGrid"></div>
+        </div>
+    </div>
+</section>
+<section class="content report-sec" id="staffnDateWiseGridSec" style="display:none">
+    <div class="row">
+        <div class="" id="box">
+            <table id="staffnDatewiseGrid" class="table-responsive"></table>
+            <div id="pagerstaffnDatewiseGrid"></div>
+        </div>
+    </div>
+</section>
+<section class="content report-sec" id="rankWiseGridSec" style="display:none">
+    <div class="row">
+        <div class="" id="box">
+            <table id="rankwiseGrid" class="table-responsive"></table>
+            <div id="pagerrankwiseGrid"></div>
+        </div>
+    </div>
+</section>
+<section class="content report-sec" id="OnloadGridSec" style="display:none">
+    <div class="row">
+        <div class="" id="box">
+            <table id="OnloadGrid" class="table-responsive"></table>
+            <div id="pagerOnloadwiseGrid"></div>
+        </div>
+    </div>
+</section>
+@*<script type="text/javascript" language="javascript" src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>*@
+@*<script src="~/Content/theme/js/excelexportjs.js"></script>*@
+
+@*<script src="https://code.highcharts.com/stock/highstock.js"></script>*@
+@*<script src="https://code.highcharts.com/modules/no-data-to-display.js"></script>*@
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/data.js"></script>
+<script src="https://code.highcharts.com/modules/drilldown.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+<script src="~/Scripts/pages/Dashbaord/dashboard.js"></script>
